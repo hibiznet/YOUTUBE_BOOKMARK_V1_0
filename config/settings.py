@@ -125,3 +125,10 @@ if render_hostname and render_hostname not in allowed_hosts:
 
 ALLOWED_HOSTS = allowed_hosts
 
+CSRF_TRUSTED_ORIGINS = []
+
+if render_hostname:
+    CSRF_TRUSTED_ORIGINS.append(
+        f"https://{render_hostname}"
+    )
+
