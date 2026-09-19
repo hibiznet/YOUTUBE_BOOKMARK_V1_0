@@ -108,3 +108,20 @@ SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 # YouTube Embed Error 153: send the site origin as the HTTP Referer policy.
 SECURE_REFERRER_POLICY = "origin"
+
+render_hostname = os.getenv("RENDER_EXTERNAL_HOSTNAME")
+
+allowed_hosts = [
+    h.strip()
+    for h in os.getenv(
+        "DJANGO_ALLOWED_HOSTS",
+        "localhost,127.0.0.1"
+    ).split(",")
+    if h.strip()
+]
+
+if render_hostname and render_hostname not in allowed_hosts:
+    allowed_hosts.append(render_hostname)
+
+ALLOWED_HOSTS = allowed_hosts
+
