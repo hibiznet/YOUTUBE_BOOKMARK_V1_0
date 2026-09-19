@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}{{ category.name }} - YouTube Bookmark{% endblock %}
+{% block content %}
+<div class="mb-4">
+    <a href="{% url 'home' %}" class="text-decoration-none">← 전체 영상</a>
+    <h1 class="fw-bold mt-2">{{ category.name }}</h1>
+    {% if category.description %}<p class="text-muted">{{ category.description }}</p>{% endif %}
+</div>
+<div class="row g-4">
+{% for video in videos %}
+    <div class="col-12 col-sm-6 col-lg-4">
+        <div class="card video-card h-100 border-0 shadow-sm">
+            <a href="{% url 'video_detail' video.pk %}">
+                <div class="thumb-wrap"><img src="{{ video.thumbnail_url }}" alt="{{ video.title }}"></div>
+            </a>
+            <div class="card-body">
+                <h5>{{ video.title }}</h5>
+                <div class="small text-muted">조회 {{ video.view_count }} · {{ video.created_at|date:"Y-m-d" }}</div>
+            </div>
+        </div>
+    </div>
+{% empty %}
+    <div class="col-12"><div class="alert alert-light border">등록된 영상이 없습니다.</div></div>
+{% endfor %}
+</div>
+{% endblock %}

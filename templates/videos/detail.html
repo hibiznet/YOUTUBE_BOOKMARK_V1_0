@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block title %}{{ video.title }} - YouTube Bookmark{% endblock %}
+{% block content %}
+<div class="mb-3">
+    <a href="{% url 'category_detail' video.category.id %}" class="text-decoration-none">← {{ video.category.name }}</a>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="embed-wrap">
+            <iframe
+                src="{{ video.embed_url }}?rel=0&origin={{ request.scheme }}://{{ request.get_host }}"
+                title="{{ video.title }}"
+                referrerpolicy="origin"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowfullscreen>
+            </iframe>
+        </div>
+        <div class="mt-2 small text-muted">
+            영상이 재생되지 않는 경우
+            <a href="{{ video.youtube_url }}" target="_blank" rel="noopener noreferrer">YouTube에서 직접 보기</a>
+        </div>
+
+        <div class="mt-3">
+            <h1 class="h3 fw-bold">{{ video.title }}</h1>
+            <div class="d-flex flex-wrap gap-3 text-muted small">
+                <span>등록일 {{ video.created_at|date:"Y-m-d" }}</span>
+                <span>조회 {{ video.view_count }}</span>
+                <span>★ {{ video.likes.count }}</span>
+            </div>
+        </div>
+
+        {% if video.description %}
+            <div class="bg-white border rounded-3 p-3 mt-3">{{ video.description|linebreaksbr }}</div>
+        {% endif %}
+
+        <div class="mt-3">
+            {% if user.is_authenticated %}
+                <form method="post" action="{% url 'toggle_like' video.pk %}">
+                    {% csrf_token %}
+                    <button class="btn {% if liked %}btn-warning{% else %}btn-outline-warning{% endif %}">
+                        {% if liked %}★ 좋아요 취소{% else %}☆ 좋아요{% endif %}
+                    </button>
+                </form>
+            {% else %}
+                <a class="btn btn-outline-warning" href="{% url 'login' %}?next={{ request.path }}">☆ 로그인 후 좋아요</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <h4 class="mb-0">댓글</h4>
+            <span class="badge text-bg-secondary">{{ comments|length }}</span>
+        </div>
+
+        {% if user.is_authenticated %}
+            {% if existing_comment %}
+                <div class="alert alert-light border">
+                    <div class="small text-muted mb-1">내 댓글</div>
+                    <div>{{ existing_comment.content|linebreaksbr }}</div>
+                    <form method="post" action="{% url 'delete_comment' video.pk %}" class="mt-2">
+                        {% csrf_token %}
+                        <input type="hidden" name="comment_id" value="{{ existing_comment.id }}">
+                        <button class="btn btn-sm btn-outline-danger">삭제</button>
+                    </form>
+                </div>
+            {% else %}
+                <form method="post" action="{% url 'add_comment' video.pk %}" class="comment-box mb-3">
+                    {% csrf_token %}
+                    {{ comment_form.content }}
+                    <button class="btn btn-dark mt-2">댓글 등록</button>
+                </form>
+            {% endif %}
+        {% else %}
+            <div class="alert alert-light border">
+                댓글을 작성하려면 <a href="{% url 'login' %}?next={{ request.path }}">로그인</a>하세요.
+            </div>
+        {% endif %}
+
+        <div class="d-flex flex-column gap-2">
+            {% for comment in comments %}
+                <div class="bg-white border rounded-3 p-3">
+                    <div class="d-flex justify-content-between gap-2 mb-1">
+                        <strong>@{{ comment.user.username }}</strong>
+                        <small class="text-muted">{{ comment.created_at|date:"Y-m-d H:i" }}</small>
+                    </div>
+                    <div>{{ comment.content|linebreaksbr }}</div>
+                </div>
+            {% empty %}
+                <div class="text-muted small py-3">아직 댓글이 없습니다.</div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

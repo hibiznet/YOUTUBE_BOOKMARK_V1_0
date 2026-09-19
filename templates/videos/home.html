@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}YouTube Bookmark{% endblock %}
+{% block content %}
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-3 mb-4">
+    <div>
+        <h1 class="fw-bold mb-1">YouTube 영상 모음</h1>
+        <p class="text-muted mb-0">카테고리별로 영상을 찾아보세요.</p>
+    </div>
+</div>
+
+<div class="d-flex gap-2 overflow-auto pb-2 mb-4">
+    <a class="btn btn-sm category-pill {% if not selected_category %}btn-dark{% else %}btn-outline-dark{% endif %}" href="{% url 'home' %}">전체</a>
+    {% for category in categories %}
+        <a class="btn btn-sm category-pill {% if selected_category.id == category.id %}btn-dark{% else %}btn-outline-dark{% endif %}"
+           href="?category={{ category.id }}">
+            {{ category.name }} <span class="badge text-bg-secondary">{{ category.video_count }}</span>
+        </a>
+    {% endfor %}
+</div>
+
+{% if selected_category %}
+    <h4 class="mb-3">{{ selected_category.name }}</h4>
+{% endif %}
+
+<div class="row g-4">
+    {% for video in videos %}
+        <div class="col-12 col-sm-6 col-lg-4">
+            <div class="card video-card h-100 border-0 shadow-sm">
+                <a href="{% url 'video_detail' video.pk %}">
+                    <div class="thumb-wrap">
+                        <img src="{{ video.thumbnail_url }}" alt="{{ video.title }}">
+                    </div>
+                </a>
+                <div class="card-body">
+                    <div class="small text-primary mb-1">{{ video.category.name }}</div>
+                    <h5 class="card-title">{{ video.title }}</h5>
+                    <div class="text-muted small">조회 {{ video.view_count }} · {{ video.created_at|date:"Y-m-d" }}</div>
+                </div>
+            </div>
+        </div>
+    {% empty %}
+        <div class="col-12">
+            <div class="text-center py-5 bg-white rounded-3 border">
+                등록된 영상이 없습니다.
+            </div>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}
